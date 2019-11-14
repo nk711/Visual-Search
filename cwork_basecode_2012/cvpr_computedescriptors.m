@@ -40,8 +40,7 @@ for filenum=1:length(allfiles)
     
     %GLOBAL COLOR HISTOGRAM
     fout=[OUT_FOLDER,'/',OUT_SUBFOLDER2,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
-  
-    F=extractMVQ(img, 128);
+    F=extractColourHistogram(img, 4);
     
     save(fout,'F');
     toc
