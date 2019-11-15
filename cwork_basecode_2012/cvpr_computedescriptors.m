@@ -24,9 +24,12 @@ OUT_FOLDER = 'descriptors';
 %% the folder specified as 'OUT_FOLDER'.
 OUT_SUBFOLDER1='averageRGB';
 OUT_SUBFOLDER2='globalColorHistogram';
-OUT_SUBFOLDER3='globalMinVariance';
+OUT_SUBFOLDER3='alexNet';
 OUT_SUBFOLDER4='globalColorhistogram';
 
+extend = true;
+
+dataset = [];
 allfiles=dir (fullfile([DATASET_FOLDER,'/Images/*.bmp']));
 for filenum=1:length(allfiles)
     fname=allfiles(filenum).name;
@@ -39,11 +42,57 @@ for filenum=1:length(allfiles)
     %F=extractAverageRGB(img);
     
     %GLOBAL COLOR HISTOGRAM
-    fout=[OUT_FOLDER,'/',OUT_SUBFOLDER2,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
-    F=extractColourHistogram(img, 4);
+    %fout=[OUT_FOLDER,'/',OUT_SUBFOLDER2,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+    %F=extractColourHistogram(img, 4);
     
-    save(fout,'F');
+    %AlexNet Feature extraction
+    label = split(fname,"_");
+    dataset = [dataset ; [imresize(img,[227,227]), label(1)]];    
     toc
 end
 
+fprintf('Using AlexNet for feature extraction');
 
+
+% when true, feature extract using AlexNet
+if extend == true
+    
+
+    mean_rgb = mean(mean(cell2mat(dataset(:,1))));
+
+    for filenum=1:length(allfiles)
+        image = cell2mat(dataset(filenum, 1));
+        image_r = image(:,:,1);
+        image_g = image(:,:,2);
+        image_b = image(:,:,3);
+        meanSubtracted = cat(3, image_r - mean_rgb(:,:,1), image_g - mean_rgb(:,:,2), image_b - mean_rgb(:,:,3));
+        dataset(filenum,1) = {meanSubtracted};
+    end
+
+    imd_dataset = zeros(227,227,3,591);
+    for item=1:length(dataset)
+        imd_dataset(:,:,:,item) = cell2mat(dataset(item,1));
+    end
+    
+    net = alexnet;
+    inputSize = net.Layers(1).InputSize;
+
+    aid_dataset = augmentedImageDatastore(inputSize(1:2), imd_dataset);
+
+    layer = 'fc7';
+    features_extracted = activations(net,aid_dataset,layer,'OutputAs','rows');
+    
+    %feature extracted contains a vector of size 591x4096
+    fprintf('\nfeatures extracted');
+
+    %Now we save the features one at a time
+    for filenum=1:length(allfiles)
+        fname=allfiles(filenum).name;
+        imgfname_full=([DATASET_FOLDER,'/Images/',fname]);
+        fout=[OUT_FOLDER,'/',OUT_SUBFOLDER3,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+        F = features_extracted(filenum, :);
+        save(fout,'F');
+    end
+
+    fprintf('\nDone\n');
+end

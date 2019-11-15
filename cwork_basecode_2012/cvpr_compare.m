@@ -5,5 +5,5 @@ dst=norm(F1-F2);
 % Double check if norm gives us the same result as the euclidian distance.
 %if dst==dst2
 %   disp("true");
-%end
+%end eleastic regularisation
 return;

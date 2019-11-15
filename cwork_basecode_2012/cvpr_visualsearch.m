@@ -29,8 +29,7 @@ DESCRIPTOR_FOLDER = 'descriptors';
 %% we are interested in working with
 DESCRIPTOR_SUBFOLDER1='averageRGB';
 DESCRIPTOR_SUBFOLDER2='globalColorHistogram';
-DESCRIPTOR_SUBFOLDER3='globalColorHistogram';
-DESCRIPTOR_SUBFOLDER4='globalColorHistogram';
+DESCRIPTOR_SUBFOLDER3='alexNet';
 
 %% 1) Load all the descriptors into "ALLFEAT"
 %% each row of ALLFEAT is a descriptor (is an image)
@@ -47,8 +46,8 @@ for filenum=1:length(allfiles)
     img=double(imread(imgfname_full))./255;
     thesefeat=[];
     %featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER1,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
-    featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER2,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
-    %featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER3,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+    %featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER2,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+    featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER3,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
     load(featfile,'F');
     ALLFILES{ctr}=imgfname_full;
     ALLFEAT=[ALLFEAT ; F];

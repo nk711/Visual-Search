@@ -9,11 +9,23 @@ allfiles=dir (fullfile([DATASET_FOLDER,'/Images/*.bmp']));
 for filenum=1:length(allfiles)
     fname=allfiles(filenum).name;
     imgfname_full=([DATASET_FOLDER,'/Images/',fname]);
-    img=imread(imgfname_full);
+    img= double(imresize(imread(imgfname_full),[227,227]));
+    
     %%imshow(cell2mat(dataset(1,1)))
     label = split(fname,"_");
-    
-    dataset = [dataset ; [imresize(img,[227,227]), label(1)]];
+    dataset = [dataset ; [img, label(1)]];
+end
+
+% Performing Mean Subtraction
+mean_rgb = mean(mean(cell2mat(dataset(:,1))));
+
+for filenum=1:length(allfiles)
+    image = cell2mat(dataset(filenum, 1));
+    image_r = image(:,:,1);
+    image_g = image(:,:,2);
+    image_b = image(:,:,3);
+    meanSubtracted = cat(3, image_r - mean_rgb(:,:,1), image_g - mean_rgb(:,:,2), image_b - mean_rgb(:,:,3));
+    dataset(filenum,1) = {meanSubtracted};
 end
 
 testset = [];
@@ -50,19 +62,19 @@ end
 net = alexnet;
 inputSize = net.Layers(1).InputSize;
 
-augimdsTrain = augmentedImageDatastore(inputSize(1:2), imd_x_train);
-augimdsTest= augmentedImageDatastore(inputSize(1:2), imd_x_test);
+aid_train = augmentedImageDatastore(inputSize(1:2), imd_x_train);
+aid_test= augmentedImageDatastore(inputSize(1:2), imd_x_test);
 
 layer = 'fc7';
-featuresTrain = activations(net,augimdsTrain,layer,'OutputAs','rows');
-featuresTest = activations(net,augimdsTest,layer,'OutputAs','rows');
+x_train = activations(net,aid_train,layer,'OutputAs','rows');
+x_test = activations(net,aid_test,layer,'OutputAs','rows');
 
 y_train = string(shuffled_dataset(:,2));
 y_test = string(testset(:,2)); 
 
-multiclass_svm_model = fitcecoc(featuresTrain, y_train);
+multiclass_svm_model = fitcecoc(x_train, y_train);
 
-y_predicted = string(predict(multiclass_svm_model, featuresTest));
+y_predicted = string(predict(multiclass_svm_model, x_test));
 
 
 accuracy = mean(y_predicted == y_test);
