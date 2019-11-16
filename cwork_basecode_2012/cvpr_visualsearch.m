@@ -30,7 +30,7 @@ DESCRIPTOR_FOLDER = 'descriptors';
 DESCRIPTOR_SUBFOLDER1='averageRGB';
 DESCRIPTOR_SUBFOLDER2='globalColorHistogram';
 DESCRIPTOR_SUBFOLDER3='alexNet';
-
+DESCRIPTOR_SUBFOLDER4='grid';
 %% 1) Load all the descriptors into "ALLFEAT"
 %% each row of ALLFEAT is a descriptor (is an image)
 
@@ -47,7 +47,9 @@ for filenum=1:length(allfiles)
     thesefeat=[];
     %featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER1,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
     %featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER2,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
-    featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER3,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+    %featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER3,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+    featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER4,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+
     load(featfile,'F');
     ALLFILES{ctr}=imgfname_full;
     ALLFEAT=[ALLFEAT ; F];
@@ -60,7 +62,7 @@ end
 
 outoutdisplay = [];
 % Number of images in our collection
-NIMG=size(ALLFEAT,1);   
+NIMG=size(allfiles,1);   
 
 % This set of code will pick a random image for each class and will find
 % the most similar images accordingly. The precision and recall will also

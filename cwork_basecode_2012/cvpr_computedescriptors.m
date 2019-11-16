@@ -25,9 +25,9 @@ OUT_FOLDER = 'descriptors';
 OUT_SUBFOLDER1='averageRGB';
 OUT_SUBFOLDER2='globalColorHistogram';
 OUT_SUBFOLDER3='alexNet';
-OUT_SUBFOLDER4='globalColorhistogram';
+OUT_SUBFOLDER4='grid';
 
-extend = true;
+extend = false;
 
 dataset = [];
 allfiles=dir (fullfile([DATASET_FOLDER,'/Images/*.bmp']));
@@ -36,7 +36,9 @@ for filenum=1:length(allfiles)
     fprintf('Processing file %d/%d - %s\n',filenum,length(allfiles),fname);
     tic;
     imgfname_full=([DATASET_FOLDER,'/Images/',fname]);
-    img=double(imread(imgfname_full));
+    %img=double(imread(imgfname_full));
+    
+    
     %AVERAGE RGB
     %fout=[OUT_FOLDER,'/',OUT_SUBFOLDER1,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
     %F=extractAverageRGB(img);
@@ -46,28 +48,36 @@ for filenum=1:length(allfiles)
     %F=extractColourHistogram(img, 4);
     
     %AlexNet Feature extraction
-    label = split(fname,"_");
-    dataset = [dataset ; [imresize(img,[227,227]), label(1)]];    
+    %label = split(fname,"_");
+    %dataset = [dataset ; [imresize(img,[227,227]), label(1)]];  
+    
+    %GRID
+    fout=[OUT_FOLDER,'/',OUT_SUBFOLDER4,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+    img= double(imresize(imread(imgfname_full),[256,256]))./255;
+    F=extractHog(img, 4,8);
+    %2816x1
+    
+    save(fout,'F');
+
     toc
 end
 
-fprintf('Using AlexNet for feature extraction');
 
 
 % when true, feature extract using AlexNet
 if extend == true
     
+    fprintf('Using AlexNet for feature extraction');
+   % mean_rgb = mean(mean(cell2mat(dataset(:,1))));
 
-    mean_rgb = mean(mean(cell2mat(dataset(:,1))));
-
-    for filenum=1:length(allfiles)
-        image = cell2mat(dataset(filenum, 1));
-        image_r = image(:,:,1);
-        image_g = image(:,:,2);
-        image_b = image(:,:,3);
-        meanSubtracted = cat(3, image_r - mean_rgb(:,:,1), image_g - mean_rgb(:,:,2), image_b - mean_rgb(:,:,3));
-        dataset(filenum,1) = {meanSubtracted};
-    end
+  %  for filenum=1:length(allfiles)
+  %      image = cell2mat(dataset(filenum, 1));
+  %      image_r = image(:,:,1);
+  %      image_g = image(:,:,2);
+  %      image_b = image(:,:,3);
+  %      meanSubtracted = cat(3, image_r - mean_rgb(:,:,1), image_g - mean_rgb(:,:,2), image_b - mean_rgb(:,:,3));
+  %      dataset(filenum,1) = {meanSubtracted};
+  %  end
 
     imd_dataset = zeros(227,227,3,591);
     for item=1:length(dataset)

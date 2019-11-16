@@ -16,38 +16,40 @@ for filenum=1:length(allfiles)
     dataset = [dataset ; [img, label(1)]];
 end
 
-% Performing Mean Subtraction
-mean_rgb = mean(mean(cell2mat(dataset(:,1))));
+testset = [];
 
+% keeping a record of the dataset 
+all_dataset = dataset;
+% manually deleting the test set from the dataset
+dataset(2,:)=[];dataset(4-1,:)=[];dataset(34-2,:)=[];dataset(36-3,:)=[];dataset(74-4,:)=[];dataset(93-5,:)=[];dataset(100-6,:)=[];dataset(122-7,:)=[];dataset(135-8,:)=[];dataset(145-9,:)=[];dataset(169-10,:)=[];dataset(174-11,:)=[];dataset(183-12,:)=[];dataset(199-13,:)=[];dataset(214-14,:)=[];dataset(234-15,:)=[];dataset(245-16,:)=[];dataset(255-17,:)=[];dataset(284-18,:)=[];dataset(289-19,:)=[];dataset(301-20,:)=[];dataset(313-21,:)=[];dataset(332-22,:)=[];dataset(343-23,:)=[];dataset(369-24,:)=[];dataset(374-25,:)=[];dataset(392-26,:)=[];dataset(401-27,:)=[];dataset(423-28,:)=[];dataset(425-29,:)=[];dataset(456-30,:)=[];dataset(467-31,:)=[];dataset(489-32,:)=[];dataset(499-33,:)=[];dataset(510-34,:)=[];dataset(523-35,:)=[];dataset(545-36,:)=[];dataset(556-37,:)=[];dataset(578-38,:)=[];dataset(587-39,:)=[];
+
+% contains the training set
+training_set = dataset;
+
+% calculate the mean for all rgb channels from all the data in our training
+% set
+mean_rgb = mean(mean(cell2mat(training_set(:,1))));
+
+% go through each image in our dataset and subtract the mean values
 for filenum=1:length(allfiles)
-    image = cell2mat(dataset(filenum, 1));
+    image = cell2mat(all_dataset(filenum, 1));
     image_r = image(:,:,1);
     image_g = image(:,:,2);
     image_b = image(:,:,3);
     meanSubtracted = cat(3, image_r - mean_rgb(:,:,1), image_g - mean_rgb(:,:,2), image_b - mean_rgb(:,:,3));
-    dataset(filenum,1) = {meanSubtracted};
+    all_dataset(filenum,1) = {meanSubtracted};
 end
-
-testset = [];
-
-%Picking 2 images from each class to make the test set 
+%updated database containing the whole dataset where each image has been
+%subtracted by the mean rgb channels of the training set.
+dataset = all_dataset;
+% Picking 2 images from each class to make the test set 
 testset = [testset ;dataset(2,:);dataset(4,:);dataset(34,:);dataset(36,:);dataset(74,:);dataset(93,:);dataset(100,:);dataset(122,:);dataset(135,:);dataset(145,:);dataset(169,:);dataset(174,:);dataset(183,:);dataset(199,:);dataset(214,:);dataset(234,:);dataset(245,:);dataset(255,:);dataset(284,:);dataset(289,:);dataset(301,:);dataset(313,:);dataset(332,:);dataset(343,:);dataset(369,:);dataset(374,:);dataset(392,:);dataset(401,:);dataset(423,:);dataset(425,:);dataset(456,:);dataset(467,:);dataset(489,:);dataset(499,:);dataset(510,:);dataset(523,:);dataset(545,:);dataset(556,:);dataset(578,:);dataset(587,:)];
-%deleting the test set from the dataset
+% manually deleting the test set from the dataset
 dataset(2,:)=[];dataset(4-1,:)=[];dataset(34-2,:)=[];dataset(36-3,:)=[];dataset(74-4,:)=[];dataset(93-5,:)=[];dataset(100-6,:)=[];dataset(122-7,:)=[];dataset(135-8,:)=[];dataset(145-9,:)=[];dataset(169-10,:)=[];dataset(174-11,:)=[];dataset(183-12,:)=[];dataset(199-13,:)=[];dataset(214-14,:)=[];dataset(234-15,:)=[];dataset(245-16,:)=[];dataset(255-17,:)=[];dataset(284-18,:)=[];dataset(289-19,:)=[];dataset(301-20,:)=[];dataset(313-21,:)=[];dataset(332-22,:)=[];dataset(343-23,:)=[];dataset(369-24,:)=[];dataset(374-25,:)=[];dataset(392-26,:)=[];dataset(401-27,:)=[];dataset(423-28,:)=[];dataset(425-29,:)=[];dataset(456-30,:)=[];dataset(467-31,:)=[];dataset(489-32,:)=[];dataset(499-33,:)=[];dataset(510-34,:)=[];dataset(523-35,:)=[];dataset(545-36,:)=[];dataset(556-37,:)=[];dataset(578-38,:)=[];dataset(587-39,:)=[];
 
-
+% Shuffled the dataset 
 shuffled_dataset = dataset(randperm(size(dataset, 1)), :);
 dataset_size = size(dataset,1);
-
-%splitting training set and validation set using an 80%/20% split
-%x_train = shuffled_dataset((1:440),1); 
-%y_train = shuffled_dataset((1:440),2);
-
-%x_val = shuffled_dataset((441:dataset_size),1); 
-%y_val = shuffled_dataset(441:dataset_size,2);
-
-%x_test = testset(:,1); 
-%y_test = testset(:,2); 
 
 imd_x_test = zeros(227,227,3,40);
 for item=1:length(testset)
