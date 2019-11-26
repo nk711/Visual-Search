@@ -63,6 +63,11 @@ end
 outoutdisplay = [];
 % Number of images in our collection
 NIMG=size(allfiles,1);   
+%computing PCA over dataset;
+eigenmodel = Eigen_Build(permute(ALLFEAT, [2,1]));
+e = Eigen_Deflate(eigenmodel, 'keepn', 3);
+ALLFEATPCA = Eigen_Project(permute(ALLFEAT, [2,1]), e);
+
 
 % This set of code will pick a random image for each class and will find
 % the most similar images accordingly. The precision and recall will also
@@ -85,18 +90,37 @@ for row = 1:20
     queryimg = x_query_set(row);    % Selecting our query image index from the current class
     query_label = y_query_set(row); % Getting the label for the query image index
 
+  
+    
     %% 3) Compute the distance of the query image to the rest of the images
+    dst=[]; % hold a list of images ranked in order of similarity 
+    %for i=1:NIMG % Goes through each image
+     %   candidate=ALLFEAT(i,:); % picks the current image
+     %   query=ALLFEAT(queryimg,:); % gets the query image
+      %  thedst=cvpr_compare(query,candidate); % computes a defined similarity measure
+       
+    %    dst=[dst ; [thedst i]]; % appends list 
+    %end
+    %dst=sortrows(dst,1);  
+
+    %% 3) Compute the distance using PCA
     dst=[]; % hold a list of images ranked in order of similarity 
     for i=1:NIMG % Goes through each image
         candidate=ALLFEAT(i,:); % picks the current image
-        query=ALLFEAT(queryimg,:); % gets the query image
-        thedst=cvpr_compare(query,candidate); % computes a defined similarity measure
+        query=ALLFEATPCA(:,queryimg); % gets the query image
+
+        xsub= candidate - e.org;
+        
+        V = diag(e.val);
+        U = e.vct;
+        mdist= sqrt(xsub' * U * inv(V) * U' * xsub);
         dst=[dst ; [thedst i]]; % appends list 
     end
-    % sort the results
-    dst=sortrows(dst,1);  
-
+    distances = Eigen_Mahalanobis(ALLFEAT(queryimg,:),e);
+    dst.sort
+    
     %% 4) Visualise the results
+
     SHOW=591; % Show top 15 results
     dst=dst(1:SHOW,:);
    
