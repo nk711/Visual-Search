@@ -37,6 +37,9 @@ DESCRIPTOR_SUBFOLDER4='grid';
 ALLFEAT=[];
 LABELS = {};
 
+% true if you would like to apply PCA on the dataset 
+PCA = false;
+
 ALLFILES=cell(1,0);
 ctr=1;
 allfiles=dir (fullfile([DATASET_FOLDER,'/Images/*.bmp']));
@@ -63,10 +66,7 @@ end
 outoutdisplay = [];
 % Number of images in our collection
 NIMG=size(allfiles,1);   
-%computing PCA over dataset;
-eigenmodel = Eigen_Build(permute(ALLFEAT, [2,1]));
-e = Eigen_Deflate(eigenmodel, 'keepn', 3);
-ALLFEATPCA = Eigen_Project(permute(ALLFEAT, [2,1]), e);
+
 
 
 % This set of code will pick a random image for each class and will find
@@ -92,32 +92,29 @@ for row = 1:20
 
   
     
-    %% 3) Compute the distance of the query image to the rest of the images
-    dst=[]; % hold a list of images ranked in order of similarity 
-    %for i=1:NIMG % Goes through each image
-     %   candidate=ALLFEAT(i,:); % picks the current image
-     %   query=ALLFEAT(queryimg,:); % gets the query image
-      %  thedst=cvpr_compare(query,candidate); % computes a defined similarity measure
-       
-    %    dst=[dst ; [thedst i]]; % appends list 
-    %end
-    %dst=sortrows(dst,1);  
-
-    %% 3) Compute the distance using PCA
-    dst=[]; % hold a list of images ranked in order of similarity 
-    for i=1:NIMG % Goes through each image
-        candidate=ALLFEAT(i,:); % picks the current image
-        query=ALLFEATPCA(:,queryimg); % gets the query image
-
-        xsub= candidate - e.org;
+    if PCA == true  
+        %% 3) Compute the distance using PCA
+        dst=[]; % hold a list of images ranked in order of similarity 
+        %computing PCA over dataset;
         
-        V = diag(e.val);
-        U = e.vct;
-        mdist= sqrt(xsub' * U * inv(V) * U' * xsub);
-        dst=[dst ; [thedst i]]; % appends list 
+        % Build an eigen model
+        eigenmodel = Eigen_Build(permute(ALLFEAT, [2,1]));
+        e = Eigen_Deflate(eigenmodel, 'keepn', 3);
+        ALLFEATPCA = Eigen_Project(permute(ALLFEAT, [2,1]), e);
+        distances = Eigen_Mahalanobis(ALLFEATPCA(:,queryimg),e);
+        distances.sort
+    else 
+        %% 3) Compute the distance of the query image to the rest of the images
+        dst=[]; % hold a list of images ranked in order of similarity 
+        for i=1:NIMG % Goes through each image
+            candidate=ALLFEAT(i,:); % picks the current image
+            query=ALLFEAT(queryimg,:); % gets the query image
+            thedst=cvpr_compare(query,candidate); % computes a defined similarity measure
+
+            dst=[dst ; [thedst i]]; % appends list 
+        end
+        dst=sortrows(dst,1); 
     end
-    distances = Eigen_Mahalanobis(ALLFEAT(queryimg,:),e);
-    dst.sort
     
     %% 4) Visualise the results
 

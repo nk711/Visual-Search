@@ -1,8 +1,6 @@
 function F = extractHog(img, divisions ,bins)
-% floor rounds each value in a pixel to the nearest integer less than
-% or equal to the calculated quantizative value
-bin_size  = (2*pi)/bins;
-
+% Calculates the size of each division
+bin_size  = (2*pi)/(bins-1);
 % No need could just use Extract HOG Features
 % Sobel filters
 Kx = [1 2 1 ; 0 0 0; -1 -2 -1]./4;
@@ -31,13 +29,16 @@ for grid_row=1:grid_size:length(img)
         sub_magnitude = mag(grid_row:(grid_row+grid_size-1), grid_column:(grid_column+grid_size-1));
         
         histogram = zeros(1,bins);
+        
         for x=1:length(sub_gradient)
             for y=1:length(sub_gradient)
+                % 0.15 is the threshold
                 if sub_magnitude(x,y)>0.15
-                    bin = floor(sub_gradient(x,y)/bin_size);
+                    bin = ceil(sub_gradient(x,y)/bin_size);
                     if bin == 0
                         bin = 1;
                     end
+              
                     histogram(bin) = histogram(bin)+1;
                 end
             end

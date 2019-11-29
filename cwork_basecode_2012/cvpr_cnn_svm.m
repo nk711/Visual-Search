@@ -28,17 +28,20 @@ training_set = dataset;
 
 % calculate the mean for all rgb channels from all the data in our training
 % set
-mean_rgb = mean(mean(cell2mat(training_set(:,1))));
+
+%mean_rgb = mean(mean(cell2mat(training_set(:,1))));
 
 % go through each image in our dataset and subtract the mean values
-for filenum=1:length(allfiles)
-    image = cell2mat(all_dataset(filenum, 1));
-    image_r = image(:,:,1);
-    image_g = image(:,:,2);
-    image_b = image(:,:,3);
-    meanSubtracted = cat(3, image_r - mean_rgb(:,:,1), image_g - mean_rgb(:,:,2), image_b - mean_rgb(:,:,3));
-    all_dataset(filenum,1) = {meanSubtracted};
-end
+%for filenum=1:length(allfiles)
+%    image = cell2mat(all_dataset(filenum, 1));
+%    image_r = image(:,:,1);
+%    image_g = image(:,:,2);
+%    image_b = image(:,:,3);
+%    meanSubtracted = cat(3, image_r - mean_rgb(:,:,1), image_g - mean_rgb(:,:,2), image_b - mean_rgb(:,:,3));
+%    all_dataset(filenum,1) = {meanSubtracted};
+%end
+
+
 %updated database containing the whole dataset where each image has been
 %subtracted by the mean rgb channels of the training set.
 dataset = all_dataset;
@@ -82,3 +85,4 @@ y_predicted = string(predict(multiclass_svm_model, x_test));
 accuracy = mean(y_predicted == y_test);
 
 confusionchart(y_test, y_predicted);
+
