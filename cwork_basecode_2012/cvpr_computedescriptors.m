@@ -46,20 +46,23 @@ for filenum=1:length(allfiles)
     %save(fout,'F');
      
     %GLOBAL COLOR HISTOGRAM
-    %fout=[OUT_FOLDER,'/',OUT_SUBFOLDER2,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
-    %F=extractColourHistogram(img, 8);
-    %save(fout,'F');
+    fout=[OUT_FOLDER,'/',OUT_SUBFOLDER2,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+    F=extractColourHistogram(img, 8);
+    save(fout,'F');
     
-    %AlexNet Feature extraction
+    %AlexNet Feature extraction MAKE SURE TO SET 'alex_net' variable to
+    %true 
     %label = split(fname,"_");
     %dataset = [dataset ; [imresize(img,[227,227]), label(1)]];  
     
     %GRID
-    fout=[OUT_FOLDER,'/',OUT_SUBFOLDER4,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
-    img= double(imresize(imread(imgfname_full),[256,256]))./255;
-    F=extractHog(img, 8,4);
-    save(fout,'F');
-
+    %fout=[OUT_FOLDER,'/',OUT_SUBFOLDER4,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+    %img= double(imresize(imread(imgfname_full),[256,256]))./255;
+    %F=extractHog(img, 8,4);
+    %save(fout,'F');
+    
+    
+    
     toc
 end
 
@@ -68,7 +71,7 @@ end
 % when true, feature extract using AlexNet
 if alex_net == true
     
-    fprintf('Using AlexNet for feature extraction');
+    fprintf('Preparing AlexNet for feature extraction...');
    % mean_rgb = mean(mean(cell2mat(dataset(:,1))));
 
   %  for filenum=1:length(allfiles)
