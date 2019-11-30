@@ -52,6 +52,7 @@ for grid_row=1:grid_size:length(img)
         end
        
         
+        %Appending to list
         for x=1:bins 
             list = [list h(x)];
         end
@@ -63,6 +64,7 @@ for grid_row=1:grid_size:length(img)
         r = mean(reshape(sub(:,:,1),1,[]));
         g = mean(reshape(sub(:,:,2),1,[]));
         b = mean(reshape(sub(:,:,3),1,[]));
+        %Appending to list
         list = [list r g b];
     end
 end

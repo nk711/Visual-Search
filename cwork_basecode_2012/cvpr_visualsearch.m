@@ -36,11 +36,6 @@ DESCRIPTOR_SUBFOLDER4='grid';
 
 ALLFEAT=[];
 LABELS = {};
-
-
-% true if you would like to lower the dimensionality of the feature descriptors 
-lower_dimensionality = false;
-
 ALLFILES=cell(1,0);
 ctr=1;
 allfiles=dir (fullfile([DATASET_FOLDER,'/Images/*.bmp']));
@@ -50,8 +45,8 @@ for filenum=1:length(allfiles)
     img=double(imread(imgfname_full))./255;
     thesefeat=[];
     %featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER1,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
-    featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER2,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
-    %featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER3,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+    %featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER2,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+    featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER3,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
     %featfile=[DESCRIPTOR_FOLDER,'/',DESCRIPTOR_SUBFOLDER4,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
 
     load(featfile,'F');
@@ -69,13 +64,18 @@ outoutdisplay = [];
 NIMG=size(allfiles,1);   
 
 
-
-% This set of code will pick a random image for each class and will find
-% the most similar images accordingly. The precision and recall will also
-% be calculated
-
+% set to true if you would like to lower the dimensionality of the feature descriptors 
+lower_dimensionality = false;
+if lower_dimensionality==true
+    eigenmodel = Eigen_Build(permute(ALLFEAT, [2,1]));
+     e = Eigen_Deflate(eigenmodel, 'keepn', 30);
+     ALLFEAT = Eigen_Project(permute(ALLFEAT, [2,1]), e);
+     ALLFEAT = permute(ALLFEAT,[2,1]);
+end
+    
 
 relevant_docs = [];
+    allimages= [];
 
 precision = [];
 recall = [];
@@ -97,22 +97,14 @@ for row = 1:20
     queryimg = x_query_set(row);    % Selecting our query image index from the current class
     query_label = y_query_set(row); % Getting the label for the query image index
 
-  
-    if lower_dimensionality==true
-        eigenmodel = Eigen_Build(permute(ALLFEAT, [2,1]));
-        e = Eigen_Deflate(eigenmodel, 'keepn', 100);
-        ALLFEAT = Eigen_Project(permute(ALLFEAT, [2,1]), e);
-        ALLFEAT = permute(ALLFEAT,[2,1]);
-    end
-    
-  
     %% 3) Compute the distance of the query image to the rest of the images
     dst=[]; % hold a list of images ranked in order of similarity 
     for i=1:NIMG % Goes through each image
           candidate=ALLFEAT(i,:); % picks the current image
           query=ALLFEAT(queryimg,:); % gets the query image
-          thedst=cvpr_compare_pca(candidate,relevant_docs); % Mahalanobis Distance
-          % thedst=cvpr_compare(query,candidate); % Euclidean Distance
+          thedst=cvpr_compare(query,candidate); % Euclidean Distance
+          %thedst=cvpr_compare_manhattan(query,candidate); % Euclidean Distance
+          %thedst=cvpr_compare_l05(query,candidate); % Euclidean Distance
           dst=[dst ; [thedst i]]; % appends list 
     end
     dst=sortrows(dst,1); 
@@ -125,18 +117,18 @@ for row = 1:20
    
     
     %Uncomment this if you require to see the results of the visual search
-    %top_15 = dst(1:15,:);
-    %outdisplay=[];
-    %for i=1:size(top_15,1)
-    %   img=imread(ALLFILES{top_15(i,2)});
-    %   img=img(1:2:end,1:2:end,:); % make image a quarter size
-    %   img=img(1:81,:,:); % crop image to uniform size vertically (some MSVC images are different heights)
-    %   outdisplay=[outdisplay img];
-    %end
-    %figure;
-    %imshow(outdisplay);
-    %axis off;
+    top_15 = dst(1:15,:);
+    outdisplay=[];
+    for i=1:size(top_15,1)
+       img=imread(ALLFILES{top_15(i,2)});
+       img=img(1:2:end,1:2:end,:); % make image a quarter size
+       img=img(1:81,:,:); % crop image to uniform size vertically (some MSVC images are different heights)
+       outdisplay=[outdisplay img];
+    end
     
+    allimages= [allimages; imresize(outdisplay,[81,2400])];
+ 
+  
     %% 4) Calculating Statistics
     results = dst(:,end);
     counter = 0;
@@ -175,5 +167,10 @@ plot( mean(recall, 1), mean(precision,1));
 xlabel('Recall'); ylabel('Precision')
 xlim([0 1])
 ylim([0 1])
+
+
+figure;
+imshow(allimages);
+axis off;
 
 

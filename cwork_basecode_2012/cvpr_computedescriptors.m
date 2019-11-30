@@ -27,7 +27,7 @@ OUT_SUBFOLDER2='globalColorHistogram';
 OUT_SUBFOLDER3='alexNet';
 OUT_SUBFOLDER4='grid';
 
-%true if you would like to use alex net to extract features
+% set to true if you would like to use alex net to extract features
 alex_net = false;
 
 dataset = [];
@@ -39,6 +39,8 @@ for filenum=1:length(allfiles)
     imgfname_full=([DATASET_FOLDER,'/Images/',fname]);
     img=double(imread(imgfname_full));
     
+    %Remember to set alex_net to false when trying to compute other
+    %descriptors 
     
     %AVERAGE RGB [NOT REQUIRED FOR CW]
     %fout=[OUT_FOLDER,'/',OUT_SUBFOLDER1,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
@@ -46,9 +48,9 @@ for filenum=1:length(allfiles)
     %save(fout,'F');
      
     %GLOBAL COLOR HISTOGRAM
-    fout=[OUT_FOLDER,'/',OUT_SUBFOLDER2,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
-    F=extractColourHistogram(img, 8);
-    save(fout,'F');
+    %fout=[OUT_FOLDER,'/',OUT_SUBFOLDER2,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+    %F=extractColourHistogram(img, 8);
+    %save(fout,'F');
     
     %AlexNet Feature extraction MAKE SURE TO SET 'alex_net' variable to
     %true 
@@ -56,10 +58,10 @@ for filenum=1:length(allfiles)
     %dataset = [dataset ; [imresize(img,[227,227]), label(1)]];  
     
     %GRID
-    %fout=[OUT_FOLDER,'/',OUT_SUBFOLDER4,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
-    %img= double(imresize(imread(imgfname_full),[256,256]))./255;
-    %F=extractHog(img, 8,4);
-    %save(fout,'F');
+    fout=[OUT_FOLDER,'/',OUT_SUBFOLDER4,'/',fname(1:end-4),'.mat'];%replace .bmp with .mat
+    img= double(imresize(imread(imgfname_full),[256,256]))./255;
+    F=extractHog(img, 4,8);
+    save(fout,'F');
     
     
     

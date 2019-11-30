@@ -41,7 +41,6 @@ training_set = dataset;
 %    all_dataset(filenum,1) = {meanSubtracted};
 %end
 
-
 %updated database containing the whole dataset where each image has been
 %subtracted by the mean rgb channels of the training set.
 dataset = all_dataset;
@@ -64,25 +63,30 @@ for item=1:length(shuffled_dataset)
     imd_x_train(:,:,:,item) = cell2mat(shuffled_dataset(item,1));
 end
 
+%AlexNet - pretrained neural network
 net = alexnet;
+%Get the input size of the first layer
 inputSize = net.Layers(1).InputSize;
 
+% Augmented Image Datastore variables
 aid_train = augmentedImageDatastore(inputSize(1:2), imd_x_train);
 aid_test= augmentedImageDatastore(inputSize(1:2), imd_x_test);
 
+% preparing our x_train and x_test from aid to be used in the svm
 layer = 'fc7';
 x_train = activations(net,aid_train,layer,'OutputAs','rows');
 x_test = activations(net,aid_test,layer,'OutputAs','rows');
 
+% getting our labels that correspond to our c values
 y_train = string(shuffled_dataset(:,2));
 y_test = string(testset(:,2)); 
 
+% feeding our features into the multiclass_svm
 multiclass_svm_model = fitcecoc(x_train, y_train);
-
+%Get the predicted results
 y_predicted = string(predict(multiclass_svm_model, x_test));
-
-
+%calculate the accuracy
 accuracy = mean(y_predicted == y_test);
-
+%show confusion chat
 confusionchart(y_test, y_predicted);
 
